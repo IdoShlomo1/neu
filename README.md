@@ -35,7 +35,7 @@ neu/
 1. **Clone the repository:**
 
    ```sh
-   git clone <your-repo-url>
+   git clone https://github.com/IdoShlomo1/neu.git
    cd neu
    ```
 
@@ -54,7 +54,11 @@ neu/
 ### 1. Build the Docker Image
 
    ```sh
-   docker build -f rest_app/Dockerfile -t flask-reverse-api .
+   cd rest_app
+   ```
+
+   ```sh
+   docker build -t flask-reverse-api .
    ```
 
 ### 2. Run the Container (Manual)
@@ -68,18 +72,19 @@ neu/
 The custom pytest plugin will automatically start/stop the container if you use the `--with-docker` flag:
 
 ```sh
-pytest automation/tests/ -s --with-docker
+neu $ pytest automation/tests/ -s --with-docker
 ```
 
 #### Additional Options
 
 - `--container-name`: Set the Docker image/container name (default: `flask-reverse-api`)
 - `--container-scope`: Set to `session` (default) or `test` for container lifecycle per test
+- `--request-debug`: Enable detailed request debugging output for API calls
 
 Example:
 
 ```sh
-pytest tests/ --with-docker --container-name=flask-reverse-api --container-scope=test
+pytest automation/tests/  --with-docker --container-name=flask-reverse-api --container-scope=test
 ```
 
 ## Server Endpoints
@@ -121,8 +126,3 @@ This ensures a clean and isolated environment for your integration tests.
 - Use `--container-scope=test` for full isolation between tests
 - Set logging to DEBUG for more output: `pytest --log-cli-level=DEBUG`
 - Ensure your Docker image is built before running tests
-
-## Troubleshooting
-
-- If the container fails to start, check Docker logs and ensure the image is built
-- If ports are in use, stop any running containers or change the port mapping

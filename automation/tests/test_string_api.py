@@ -15,28 +15,29 @@ def test_reverse_string(api_client, text: str, description: str):
     Test the reverse endpoint returns the reversed text.
     """
     print(f"Testing reverse with text: {text} - {description}")
-    response = api_client.reverse(text)
-    assert response.status_code == 200
-    data = response.json()
-    print(f"Reversed result: {data['result']}")
+    reverse_response = api_client.reverse(text)
+    assert reverse_response.status_code == 200
+    response_data = reverse_response.json()
+    print(f"Reversed result: {response_data['result']}")
     print(f"Original text: {text}")
-    assert "result" in data
-    assert data["result"] == ' '.join(reversed(text.strip().split()))
+    assert "result" in response_data
+    expected_result = ' '.join(reversed(text.strip().split()))
+    assert response_data["result"] == expected_result
 
 
 def test_restore(api_client):
     """
     Test the restore endpoint returns the last reversed result.
     """
-    text = "restore test"
-    api_client.reverse(text)
-    response = api_client.restore()
+    input_text = "restore test"
+    api_client.reverse(input_text)
+    restore_response = api_client.restore()
 
-    assert response.status_code == 200
-    data = response.json()
-    assert "result" in data
-    res = ' '.join(reversed(text.strip().split()))
-    assert data["result"] == res, f"Expected '{text}', got '{data['result']}'"
+    assert restore_response.status_code == 200
+    response_data = restore_response.json()
+    assert "result" in response_data
+    expected_result = ' '.join(reversed(input_text.strip().split()))
+    assert response_data["result"] == expected_result, f"Expected '{expected_result}', got '{response_data['result']}'"
 
 
 def test_reverse_empty_string(api_client):
@@ -53,23 +54,24 @@ def test_restore_after_multiple_reverses(api_client):
     """
     Test that restore returns the most recent reversed result after multiple reverses.
     """
-    res = api_client.reverse("one two three")
-    print(f"First reverse result: {res.json()['result']}")
-    res2 = api_client.reverse("alpha beta gamma")
+    first_response = api_client.reverse("one two three")
+    print(f"First reverse result: {first_response.json()['result']}")
+    second_response = api_client.reverse("alpha beta gamma")
 
-    print(f"Second reverse result: {res2.json()['result']}")
-    response = api_client.restore()
-    assert response.status_code == 200
-    data = response.json()
+    print(f"Second reverse result: {second_response.json()['result']}")
+    restore_response = api_client.restore()
+    assert restore_response.status_code == 200
+    response_data = restore_response.json()
 
-    assert data["result"] == "gamma beta alpha", f"{data}"
+    expected_result = "gamma beta alpha"
+    assert response_data["result"] == expected_result, f"Expected '{expected_result}', got '{response_data['result']}'"
 
 
 def test_content_type_is_json(api_client):
     """
     Test that all responses have application/json content-type.
     """
-    response = api_client.reverse("json test")
-    assert response.headers["Content-Type"].startswith("application/json")
-    response = api_client.restore()
-    assert response.headers["Content-Type"].startswith("application/json")
+    reverse_response = api_client.reverse("json test")
+    assert reverse_response.headers["Content-Type"].startswith("application/json")
+    restore_response = api_client.restore()
+    assert restore_response.headers["Content-Type"].startswith("application/json")

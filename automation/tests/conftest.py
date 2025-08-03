@@ -1,5 +1,6 @@
 import pytest
 from automation.api.strings_api import ApiClient
+import logging
 
 
 def pytest_addoption(parser):
@@ -13,7 +14,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--request-debug",
         action="store_true",
-        default=True,
+        default=False,
         help="Enable request debugging output."
     )
 
@@ -31,7 +32,10 @@ def api_client(request) -> ApiClient:
     hooks: dict[str, list] = {}
 
     if request_debug:
-        hooks['response'] = [lambda r, *args, **kwargs: print(f"Response: {r.status_code} {r.text}")]
+        logger = logging.getLogger("api_client.request")
+        hooks['response'] = [
+            lambda r, *args, **kwargs: logger.debug(f"Response: method={r.request.method} status_code={r.status_code} url={r.url} body={r.text}")
+        ]
 
     return ApiClient(base_url=url, hooks=hooks)
 

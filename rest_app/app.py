@@ -1,26 +1,56 @@
+"""
+Flask Reverse API
+
+This Flask application provides two endpoints:
+- `/reverse`: Accepts a `text` query parameter, reverses the order of words, and caches the result.
+- `/restore`: Returns the most recently cached result from `/reverse`.
+
+Endpoints:
+    GET /reverse?text=your+text+here
+        Args:
+            text (str): The text to reverse (words order).
+        Returns:
+            JSON: {"result": reversed_text} or error message.
+
+    GET /restore
+        Returns:
+            JSON: {"result": cached_text} or error message if no cache exists.
+
+Example usage:
+    curl 'http://localhost:8000/reverse?text=hello+world'
+    # {"result": "world hello"}
+
+    curl 'http://localhost:8000/restore'
+    # {"result": "world hello"}
+"""
+
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-last_result = {"result": ''}
+
+cache: dict = {
+    "result": None
+}
 
 
 @app.route('/reverse', methods=['GET'])
 def reverse():
-    input_text = request.args.get('text')
+    input_text: str | None = request.args.get('text')
+
     if not input_text:
         return jsonify({"error": "Missing 'text' query parameter"}), 400
 
-    reversed_words = ' '.join(reversed(input_text.strip().split()))
-    last_result["result"] = reversed_words
-    return jsonify({"result": reversed_words})
+    cache['result'] = ' '.join(reversed(input_text.strip().split()))
+    
+    return jsonify({"result": cache['result']})
 
 
 @app.route('/restore', methods=['GET'])
 def restore():
-    if last_result["result"] is None:
+    if cache['result'] is None:
         return jsonify({"error": "No previous result found"}), 404
 
-    return jsonify({"result": last_result["result"]})
+    return jsonify({"result": cache['result']})
 
 
 if __name__ == '__main__':
